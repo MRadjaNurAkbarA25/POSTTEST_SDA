@@ -17,7 +17,8 @@ int main()
                 = 5n + 1 (fungsi linear => O(n)
         
         Best Case  : Fungsi linear ==> O(n)
-        Worst Case : Fungsi linear ==> O(n) */
+        Worst Case : Fungsi linear ==> O(n)
+        Best case jika urutan pada array menaik, worst case jika urutan pada array menurun */
 
     for (int i = 1; i < 8; i++)
     {
