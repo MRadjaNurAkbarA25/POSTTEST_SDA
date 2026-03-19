@@ -120,7 +120,7 @@ void tampilJadwal(Kereta * arr, int n) {
     cout << table << endl;
 }
 
-void tambahJadwal(Kereta data[], int &n) {
+void tambahJadwal(Kereta* data, int &n) {
     int nomorBaru = 100 + n + 1;
 
     int pilihNama = tampilMenu("Pilih nama kereta: \n", daftarNama, 10);
@@ -150,6 +150,32 @@ void tambahJadwal(Kereta data[], int &n) {
     cout << "Jadwal berhasil ditambahkan!\n";
 }
 
+void linearSearch(Kereta* arr, int n, string asal, string tujuan) {
+    Table table;
+    table.add_row({"No", "Nama", "Harga (Rp)", "Asal", "Tujuan", "Jam"});
+
+    bool ketemu = false;
+    for (int i=0; i<n; i++) {
+        if ((arr+i)->asal == asal && (arr+i)->tujuan == tujuan) {
+            table.add_row({
+                to_string((arr+i)->nomorKereta),
+                (arr+i)->namaKereta,
+                to_string((arr+i)->hargaTiket),
+                (arr+i)->asal,
+                (arr+i)->tujuan,
+                (arr+i)->jamBerangkat
+            });
+            ketemu = true;
+        }
+    }
+    if (!ketemu) {
+        cout << "Kereta dari " << asal << " ke " << tujuan << " tidak ditemukan!\n";
+    } else {
+        cout << "\nHasil pencarian: " << asal << " ke " << tujuan << "\n";
+        cout << table << "\n";
+    }
+}
+
 int main() {
     Kereta data[MAX] = {
     //  nomor   nama                    harga   asal                tujuan              jam
@@ -167,8 +193,8 @@ int main() {
     int n = 10;
     while (true) {
         cout << "Sistem Manajemen Keberangkatan Kereta Api\n";
-        string opsiMenu[] = {"Lihat Jadwal", "Tambah jadwal"};
-        int pilihan = tampilMenu("Pilih menu: ", opsiMenu, 2);
+        string opsiMenu[] = {"Lihat Jadwal", "Tambah jadwal", "Cari rute kereta"};
+        int pilihan = tampilMenu("Pilih menu: ", opsiMenu, 3);
         switch(pilihan) {
             case 1: {
                 tampilJadwal(data, n);
@@ -179,6 +205,17 @@ int main() {
             }
             case 2: {
                 tambahJadwal(data, n);
+                cout << "Tekan Enter untuk melanjutkan...";
+                cin.get();
+                system("cls || clear");
+                break;
+            }
+            case 3: {
+                int pilihAsal = tampilMenu("Pilih asal kereta: \n", daftarStasiun, 7);
+                int pilihTujuan = tampilMenu("Pilih tujuan kereta: \n", daftarStasiun, 7);
+                string asal = daftarStasiun[pilihAsal-1];
+                string tujuan = daftarStasiun[pilihTujuan-1];
+                linearSearch(data, n, asal, tujuan);
                 cout << "Tekan Enter untuk melanjutkan...";
                 cin.get();
                 system("cls || clear");
