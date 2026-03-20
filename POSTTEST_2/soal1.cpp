@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tabulate/table.hpp>
+#include <cmath>
 using namespace std;
 using namespace tabulate;
 
@@ -176,6 +177,43 @@ void linearSearch(Kereta* arr, int n, string asal, string tujuan) {
     }
 }
 
+void jumpSearch(Kereta* arr, int n, int x) {
+    int step = sqrt(n);
+    int prev = 0;
+
+    bool ketemu = false;
+    while ((arr+min(step, n)-1)->nomorKereta < x) {
+        prev = step;
+        step += sqrt(n);
+        if (prev >= n) {
+            cout << "Kereta tidak ditemukan!\n";
+            return;
+        }
+    }
+    while ((arr+prev)->nomorKereta < x) {
+        prev++;
+        if (prev == min(step, n)) {
+            cout << "Kereta tidak ditemukan!\n";
+            return;
+        }
+    }
+
+    if ((arr+prev)->nomorKereta == x) {
+        Table table;
+        table.add_row({"No", "Nama", "Harga (Rp)", "Asal", "Tujuan", "Jam"});
+        table.add_row({
+            to_string((arr+prev)->nomorKereta),
+            (arr+prev)->namaKereta,
+            to_string((arr+prev)->hargaTiket),
+            (arr+prev)->asal,
+            (arr+prev)->tujuan,
+            (arr+prev)->jamBerangkat
+        });
+        cout << "Kereta ditemukan!\n";
+        cout << table << "\n";
+    } else cout << "Kereta tidak ditemukan!\n";
+}
+
 int main() {
     Kereta data[MAX] = {
     //  nomor   nama                    harga   asal                tujuan              jam
@@ -193,8 +231,9 @@ int main() {
     int n = 10;
     while (true) {
         cout << "Sistem Manajemen Keberangkatan Kereta Api\n";
-        string opsiMenu[] = {"Lihat Jadwal", "Tambah jadwal", "Cari rute kereta"};
-        int pilihan = tampilMenu("Pilih menu: ", opsiMenu, 3);
+        string opsiMenu[] = {"Lihat Jadwal", "Tambah jadwal", "Cari rute kereta", 
+                            "Cari nomor kereta"};
+        int pilihan = tampilMenu("Pilih menu: ", opsiMenu, 4);
         switch(pilihan) {
             case 1: {
                 tampilJadwal(data, n);
@@ -217,6 +256,17 @@ int main() {
                 string tujuan = daftarStasiun[pilihTujuan-1];
                 linearSearch(data, n, asal, tujuan);
                 cout << "Tekan Enter untuk melanjutkan...";
+                cin.get();
+                system("cls || clear");
+                break;
+            }
+            case 4: {
+                cout << "Masukkan nomor kereta: ";
+                int x;
+                cin >> x;
+                jumpSearch(data, n, x);
+                cout << "Tekan Enter untuk melanjutkan...";
+                cin.ignore();
                 cin.get();
                 system("cls || clear");
                 break;
