@@ -178,26 +178,31 @@ void linearSearch(Kereta* arr, int n, string asal, string tujuan) {
 }
 
 void jumpSearch(Kereta* arr, int n, int x) {
-    int step = sqrt(n);
-    int prev = 0;
+    int step = sqrt(n); // Ukuran block, jika hasil akar tidak bulat ambil nilai bawah, n=10 -> step=3
+    int prev = 0; // Penanda awal block saat ini
 
-    bool ketemu = false;
-    while ((arr+min(step, n)-1)->nomorKereta < x) {
-        prev = step;
-        step += sqrt(n);
-        if (prev >= n) {
+
+    // Fase jump
+    // Lompat selama ujung block masih < target
+    while ((arr+min(step, n)-1)->nomorKereta < x) { //arr+min... = index terakhir block saat ini
+        // kalau masih < x, lompat ke block berikutnya
+        prev = step; //simpan posisi awal block
+        step += sqrt(n); // lompat ke block berikutnya
+        if (prev >= n) { 
             cout << "Kereta tidak ditemukan!\n";
-            return;
+            return; // sudah melewati semua elemen
         }
     }
-    while ((arr+prev)->nomorKereta < x) {
+    // Fase linear
+    while ((arr+prev)->nomorKereta < x) { // Cari satu per satu dalam block yg ditemukan
+        // Kalau nilai di prev masih < x, geser satu langkah
         prev++;
-        if (prev == min(step, n)) {
+        if (prev == min(step, n)) { //Sudah sampai ujung block
             cout << "Kereta tidak ditemukan!\n";
             return;
         }
     }
-
+    // Menampilkan hasil dalam tabel
     if ((arr+prev)->nomorKereta == x) {
         Table table;
         table.add_row({"No", "Nama", "Harga (Rp)", "Asal", "Tujuan", "Jam"});
@@ -212,6 +217,95 @@ void jumpSearch(Kereta* arr, int n, int x) {
         cout << "Kereta ditemukan!\n";
         cout << table << "\n";
     } else cout << "Kereta tidak ditemukan!\n";
+}
+
+void merge(Kereta* arr,  int left, int mid, int right) {
+    int n1= mid-left+1;
+    int n2= right-mid;
+
+    Kereta* L = new Kereta[n1];
+    Kereta* R = new Kereta[n2];
+
+    for (int i=0; i<n1; i++)
+        *(L+i) = *(arr+left+i);
+    for (int j=0; j<n2; j++)
+        *(R+j) = *(arr+mid+1+j);
+
+    int i=0, j=0, k=left;
+
+    while (i<n1 && j<n2) {
+        if((L+i)->namaKereta <= (R+j)->namaKereta) {
+            *(arr+k) = *(L+i);
+            i++;
+        } else {
+            *(arr+k) = *(R+j);
+            j++;
+        }
+        k++;
+    }
+
+    // sisa kiri
+    while (i<n1) {
+        arr[k] = L[i];
+        i++, k++;
+    }
+    // sisa kanan
+    while (j<n2) {
+        arr[k] = R[j];
+        j++, k++;
+    }
+
+    delete[] L;
+    delete[] R;
+}
+
+void mergeSort(Kereta* arr, int left, int right ) {
+    if (left<right) {
+        int mid = left + (right- left)/2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+
+        merge(arr, left, mid, right);
+    }
+}
+
+void hasilTampilSort(Kereta* arr, int n, string judul) {
+    cout << "\n" << judul << "\n";
+    Table table;
+    table.add_row({"No", "Nama", "Harga (Rp)", "Asal", "Tujuan", "Jam"});
+    for (int i = 0; i < n; i++) {
+        table.add_row({
+            to_string((arr+i)->nomorKereta),
+            (arr+i)->namaKereta,
+            to_string((arr+i)->hargaTiket),
+            (arr+i)->asal,
+            (arr+i)->tujuan,
+            (arr+i)->jamBerangkat
+        });
+    }
+    cout << table << "\n";
+}
+
+void swapKereta(Kereta *a, Kereta *b) {
+    Kereta temporary = *a;
+    *a = *b;
+    *b = temporary;
+}
+
+void selectionSort(Kereta* arr, int n) {
+    for (int i=0; i<n; i++) {
+        int minIndex = i;
+
+        for (int j = i+1; j<n; j++) {
+            if (arr[j].hargaTiket < arr[minIndex].hargaTiket) {
+                minIndex = j;
+            }
+        }
+
+        if (minIndex != i) {
+            swapKereta(&arr[i], &arr[minIndex]);
+        }
+    }
 }
 
 int main() {
@@ -232,8 +326,8 @@ int main() {
     while (true) {
         cout << "Sistem Manajemen Keberangkatan Kereta Api\n";
         string opsiMenu[] = {"Lihat Jadwal", "Tambah jadwal", "Cari rute kereta", 
-                            "Cari nomor kereta"};
-        int pilihan = tampilMenu("Pilih menu: ", opsiMenu, 4);
+                            "Cari nomor kereta", "Urutkan nama A-Z", "Urutkan harga tiket"};
+        int pilihan = tampilMenu("Pilih menu: ", opsiMenu, 6);
         switch(pilihan) {
             case 1: {
                 tampilJadwal(data, n);
@@ -262,11 +356,25 @@ int main() {
             }
             case 4: {
                 cout << "Masukkan nomor kereta: ";
-                int x;
-                cin >> x;
+                int x = inputAngka("Masukkan nomor kereta: ", 101, 999);
                 jumpSearch(data, n, x);
                 cout << "Tekan Enter untuk melanjutkan...";
-                cin.ignore();
+                cin.get();
+                system("cls || clear");
+                break;
+            }
+            case 5: {
+                mergeSort(data, 0, n - 1);
+                hasilTampilSort(data, n, "Jadwal Kereta (A-Z)");
+                cout << "Tekan Enter untuk melanjutkan...";
+                cin.get();
+                system("cls || clear");
+                break;
+            }
+            case 6: {
+                selectionSort(data, n);
+                hasilTampilSort(data, n, "Jadwal kereta (termurah)");
+                cout << "Tekan Enter untuk melanjutkan...";
                 cin.get();
                 system("cls || clear");
                 break;
